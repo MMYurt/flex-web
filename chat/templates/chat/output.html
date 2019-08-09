@@ -1,0 +1,139 @@
+<!-- chat/templates/chat/room.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat Room</title>
+</head>
+<body>
+    <b>Source1</b><input type="checkbox" class="topObject" id="Source1" value ="Source1" onclick="showList(this.id)"/>&nbsp;
+    <ul class="Source1Sub" id="Source1Sub" style = "display:none">
+        Output<input type="checkbox" value="Output" class="Source1SubElements"/><br>
+        State<input type="checkbox" value = "State" class="Source1SubElements"/><br>
+        <textarea id="Source1-log" cols="30" rows="10"></textarea><br/>
+
+    </ul>
+
+    <b>Queue1</b><input type="checkbox" class="topObject" id="Queue1" value ="Queue1"onclick="showList(this.id)"/>&nbsp;
+    <ul class="Queue1Sub" id="Queue1Sub" style = "display:none">
+        State<input type="checkbox" value="State" class="Queue1SubElements"/><br>
+        Input<input type="checkbox" value="Input" class="Queue1SubElements"/><br>
+        Output<input type="checkbox" value="Output" class="Queue1SubElements"/><br>
+        Current Content<input type="checkbox" value="Current Content" class="Queue1SubElements"/><br>
+        <textarea id="Queue1-log" cols="30" rows="10"></textarea><br/>
+
+    </ul>
+
+    <b>Operator1</b><input type="checkbox" class="topObject" id="Operator1" value="Operator1" onclick="showList(this.id)"/>&nbsp;
+    <ul class="Operator1Sub" id="Operator1Sub" style = "display:none">
+        State<input type="checkbox" value="State" class="Operator1SubElements"/><br>
+        Input<input type="checkbox" value="Input" class="Operator1SubElements"/><br>
+        Output<input type="checkbox" value="Output" class="Operator1SubElements"/><br>
+        Current Content<input type="checkbox" value="Current Content" class="Operator1SubElements"/><br>
+        Total Travel Time<input type="checkbox" value="Total Travel Time" class="Operator1SubElements"/><br>
+        <textarea id="Operator1-log" cols="30" rows="10"></textarea><br/>
+
+    </ul>
+    <input id="sendData" type="button" value="Send2" onclick="obtainData()">    
+
+
+<script src="//code.jquery.com/jquery-2.1.1.min.js"></script> 
+
+<script>
+
+    function showList(element){
+        var checkBox = document.getElementById(element);
+        var subdiv = element + "Sub";
+        var div = document.getElementById(subdiv);
+        if(checkBox.checked == true){
+            div.style.display = "block";
+        }
+        else{
+            div.style.display = "none";
+        }
+    }
+    
+    document.querySelector('#sendData').onclick = function(e) {
+        var messageInputDom = obtainData();
+        chatSocketOutput.send(JSON.stringify({
+            'Objects': messageInputDom,
+            'messageOutput': "",
+            'objName': "",
+            'objAttr': "",    
+        }));
+       
+    };
+    
+    function obtainData(){
+            var jsonData = {};
+            var checkBox = document.getElementsByClassName("topObject");
+
+            //var subdiv = element + "Sub";
+            for(i = 0; i<checkBox.length; i++){ 
+                if(checkBox[i].checked == true){
+                    var subDiv = checkBox[i].value + "Sub";
+                    var subDivElements = subDiv + "Elements";
+                    var subObjects = document.getElementsByClassName(subDivElements);
+                    jsonData[checkBox[i].id] = new Array();
+
+                    for(j = 0; j<subObjects.length; j++){
+                        if(subObjects.item(j).checked == true){
+                            jsonData[checkBox[i].id].push(subObjects.item(j).value);
+                    }
+                        
+                        
+                    } 
+                }
+               
+
+            }
+            return jsonData;
+        }
+  
+    //var roomName = {{ room_name_json }};
+    var temp = 'ws://' + window.location.host + '/ws'+ window.location.pathname;
+
+    var chatSocketOutput = new ReconnectingWebSocket(
+        'ws://' + window.location.host +
+        '/ws' +window.location.pathname);
+
+    
+    chatSocketOutput.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var message = data['messageOutput'];
+        var objName = data['objName'];
+        var objAttr = data['objAttr'];
+        if(objName == "Source1"){
+            document.querySelector('#Source1-log').value += (objName + '-' + objAttr + ":" + message + '\n');
+            $(document).ready(function(){           //For adjust scroll to bottom
+                var $textarea = $('#Source1-log');
+                $textarea.scrollTop($textarea[0].scrollHeight);
+            });
+        }
+        else if(objName == "Queue1"){
+            document.querySelector('#Queue1-log').value += (objName + '-' + objAttr + ":" + message + '\n');
+            $(document).ready(function(){           //For adjust scroll to bottom
+                var $textarea = $('#Queue1-log');
+                $textarea.scrollTop($textarea[0].scrollHeight);
+            });
+        }
+
+        else if(objName == "Operator1"){
+            document.querySelector('#Operator1-log').value += (objName + '-' + objAttr + ":" + message + '\n');
+            $(document).ready(function(){           //For adjust scroll to bottom
+                var $textarea = $('#Operator1-log');
+                $textarea.scrollTop($textarea[0].scrollHeight);
+            });            
+        }
+
+    };
+
+    chatSocketOutput.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    
+
+ 
+</script>
+</html>
