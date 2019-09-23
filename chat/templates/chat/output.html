@@ -6,6 +6,7 @@
     <title>Chat Room</title>
 </head>
 <body>
+
     <b>Source1</b><input type="checkbox" class="topObject" id="Source1" value ="Source1" onclick="showList(this.id)"/>&nbsp;
     <ul class="Source1Sub" id="Source1Sub" style = "display:none">
         Output<input type="checkbox" value="Output" class="Source1SubElements"/><br>
@@ -93,7 +94,7 @@
     //var roomName = {{ room_name_json }};
     var temp = 'ws://' + window.location.host + '/ws'+ window.location.pathname;
 
-    var chatSocketOutput = new ReconnectingWebSocket(
+    var chatSocketOutput = new WebSocket(
         'ws://' + window.location.host +
         '/ws' +window.location.pathname);
 
